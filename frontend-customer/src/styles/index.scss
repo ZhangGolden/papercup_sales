@@ -1,0 +1,101 @@
+// 全局样式
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background-color: #f5f5f5;
+}
+
+// 覆盖Element Plus默认样式
+.el-header {
+  background-color: #fff;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+.el-main {
+  padding: 20px;
+}
+
+.el-footer {
+  background-color: #333;
+  color: #fff;
+}
+
+// 通用类
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.mb-20 {
+  margin-bottom: 20px;
+}
+
+.mt-20 {
+  margin-top: 20px;
+}
+
+.p-20 {
+  padding: 20px;
+}
+
+// 卡片样式
+.custom-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+  
+  &:hover {
+    box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+}
+
+// 产品卡片
+.product-card {
+  .product-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px 8px 0 0;
+  }
+  
+  .product-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 10px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .product-price {
+    color: #e74c3c;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  
+  .original-price {
+    color: #999;
+    font-size: 14px;
+    text-decoration: line-through;
+    margin-left: 10px;
+  }
+}
+
+// 响应式
+@media (max-width: 768px) {
+  .el-main {
+    padding: 10px;
+  }
+}
