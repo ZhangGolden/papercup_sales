@@ -48,6 +48,12 @@ const routes = [
         name: 'Profile',
         component: () => import('@/views/Profile.vue'),
         meta: { title: '个人中心', requiresAuth: true }
+      },
+      {
+        path: '/payment',
+        name: 'Payment',
+        component: () => import('@/views/Payment.vue'),
+        meta: { title: '订单支付', requiresAuth: true }
       }
     ]
   },

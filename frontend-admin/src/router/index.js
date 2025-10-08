@@ -43,6 +43,12 @@ const routes = [
         name: 'Users',
         component: () => import('@/views/Users.vue'),
         meta: { title: '客户管理', icon: 'User' }
+      },
+      {
+        path: '/payment-config',
+        name: 'PaymentConfig',
+        component: () => import('@/views/PaymentConfig.vue'),
+        meta: { title: '支付配置', icon: 'CreditCard' }
       }
     ]
   },
