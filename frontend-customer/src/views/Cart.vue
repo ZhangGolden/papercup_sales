@@ -17,7 +17,7 @@
             <img :src="getProductImage(item.product?.images)" :alt="item.product?.name" class="item-image" />
             <div class="item-info">
               <h4>{{ item.product?.name }}</h4>
-              <p>单价: ¥{{ item.product?.price }}</p>
+              <p>单价: ¥{{ formatPrice(item.product?.price) }}</p>
             </div>
             <div class="item-quantity">
               <el-input-number
@@ -28,7 +28,7 @@
               />
             </div>
             <div class="item-total">
-              ¥{{ (item.product?.price * item.quantity).toFixed(2) }}
+              ¥{{ formatPrice(calculateItemTotal(item)) }}
             </div>
             <div class="item-actions">
               <el-button type="danger" size="small" @click="removeItem(item.id)">
@@ -42,7 +42,7 @@
         <div class="cart-footer">
           <div class="cart-total">
             <span>已选择 {{ selectedItems.length }} 件商品</span>
-            <span class="total-price">合计: ¥{{ totalPrice.toFixed(2) }}</span>
+            <span class="total-price">合计: ¥{{ formatPrice(totalPrice) }}</span>
           </div>
           <div class="cart-actions">
             <el-button @click="clearSelected">清空选中</el-button>
@@ -77,8 +77,35 @@ const selectedItems = ref([])
 const totalPrice = computed(() => {
   return cartStore.cartItems
     .filter(item => selectedItems.value.includes(item.id))
-    .reduce((total, item) => total + (item.product?.price * item.quantity), 0)
+    .reduce((total, item) => {
+      const itemTotal = calculateItemTotal(item)
+      return total + itemTotal
+    }, 0)
 })
+
+// 格式化价格，处理NaN和无效值
+const formatPrice = (price) => {
+  const numPrice = parseFloat(price)
+  if (isNaN(numPrice) || numPrice < 0) {
+    return '0.00'
+  }
+  return numPrice.toFixed(2)
+}
+
+// 计算单项商品总价
+const calculateItemTotal = (item) => {
+  if (!item || !item.product || !item.quantity) {
+    return 0
+  }
+  const price = parseFloat(item.product.price)
+  const quantity = parseInt(item.quantity)
+  
+  if (isNaN(price) || isNaN(quantity) || price < 0 || quantity < 0) {
+    return 0
+  }
+  
+  return price * quantity
+}
 
 const getProductImage = (images) => {
   if (!images) return '/placeholder.jpg'

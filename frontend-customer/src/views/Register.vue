@@ -133,7 +133,7 @@ const rules = {
     { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
   ],
   phone: [
-    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
+    { pattern: /^$|^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
   ],
   realName: [
     { max: 50, message: '真实姓名长度不能超过50个字符', trigger: 'blur' }
