@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { login, getProfile } from '@/api/auth'
 
 export const useUserStore = defineStore('user', () => {
-  const token = ref(localStorage.getItem('admin_token') || '')
+  const token = ref((localStorage.getItem('admin_token') || '').trim())
   const userInfo = ref(JSON.parse(localStorage.getItem('admin_userInfo') || '{}'))
 
   const isLoggedIn = computed(() => !!token.value && userInfo.value.role === 'ADMIN')
@@ -20,10 +20,12 @@ export const useUserStore = defineStore('user', () => {
           return { success: false, message: '无管理员权限' }
         }
         
-        token.value = newToken
+        // 确保token没有额外的空白字符
+        const cleanToken = newToken.trim()
+        token.value = cleanToken
         userInfo.value = userData
         
-        localStorage.setItem('admin_token', newToken)
+        localStorage.setItem('admin_token', cleanToken)
         localStorage.setItem('admin_userInfo', JSON.stringify(userData))
         
         return { success: true }

@@ -129,6 +129,21 @@
         <el-form-item label="库存" prop="stock">
           <el-input-number v-model="form.stock" :min="0" />
         </el-form-item>
+        <el-form-item label="产品图片">
+          <el-upload
+            ref="uploadRef"
+            :action="uploadAction"
+            :headers="uploadHeaders"
+            :file-list="imageList"
+            :on-success="handleUploadSuccess"
+            :on-remove="handleRemoveImage"
+            :before-upload="beforeUpload"
+            list-type="picture-card"
+            multiple
+          >
+            <el-icon><Plus /></el-icon>
+          </el-upload>
+        </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-radio-group v-model="form.status">
             <el-radio :label="1">上架</el-radio>
@@ -147,9 +162,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { Plus, Delete, Search } from '@element-plus/icons-vue'
-import { getProducts, getCategories, createProduct, updateProduct, deleteProduct, deleteProducts, updateProductStatus } from '@/api/product'
+import { getProducts, getCategories, createProduct, updateProduct, deleteProduct, deleteProducts, updateProductStatus, uploadFile } from '@/api/product'
+import { useUserStore } from '@/stores/user'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const loading = ref(false)
@@ -162,6 +178,15 @@ const dialogVisible = ref(false)
 const isEdit = ref(false)
 const submitting = ref(false)
 const formRef = ref()
+const uploadRef = ref()
+const userStore = useUserStore()
+
+// 图片上传相关
+const imageList = ref([])
+const uploadAction = '/api/files/upload'
+const uploadHeaders = computed(() => ({
+  'Authorization': `Bearer ${userStore.token}`
+}))
 
 const pagination = reactive({
   current: 1,
@@ -175,7 +200,8 @@ const form = reactive({
   price: 0,
   originalPrice: 0,
   stock: 0,
-  status: 1
+  status: 1,
+  images: []
 })
 
 const rules = {
@@ -233,6 +259,26 @@ const showAddDialog = () => {
 const showEditDialog = (row) => {
   isEdit.value = true
   Object.assign(form, row)
+  
+  // 处理图片数据
+  if (row.images) {
+    try {
+      const images = JSON.parse(row.images)
+      imageList.value = images.map((url, index) => ({
+        name: `image-${index}`,
+        url: url,
+        uid: Date.now() + index
+      }))
+      form.images = images
+    } catch (e) {
+      imageList.value = []
+      form.images = []
+    }
+  } else {
+    imageList.value = []
+    form.images = []
+  }
+  
   dialogVisible.value = true
 }
 
@@ -245,8 +291,10 @@ const resetForm = () => {
     price: 0,
     originalPrice: 0,
     stock: 0,
-    status: 1
+    status: 1,
+    images: []
   })
+  imageList.value = []
   formRef.value?.resetFields()
 }
 
@@ -260,9 +308,15 @@ const handleSubmit = async () => {
   submitting.value = true
   
   try {
+    // 准备提交数据，将图片数组转换为JSON字符串
+    const submitData = {
+      ...form,
+      images: JSON.stringify(form.images)
+    }
+    
     const response = isEdit.value 
-      ? await updateProduct(form.id, form)
-      : await createProduct(form)
+      ? await updateProduct(form.id, submitData)
+      : await createProduct(submitData)
       
     if (response.code === 200) {
       ElMessage.success(isEdit.value ? '更新成功' : '创建成功')
@@ -338,6 +392,38 @@ const handleSizeChange = (size) => {
 const handleCurrentChange = (current) => {
   pagination.current = current
   getProductList()
+}
+
+// 图片上传相关方法
+const beforeUpload = (file) => {
+  const isImage = file.type.startsWith('image/')
+  const isLt10M = file.size / 1024 / 1024 < 10
+
+  if (!isImage) {
+    ElMessage.error('只能上传图片文件!')
+    return false
+  }
+  if (!isLt10M) {
+    ElMessage.error('图片大小不能超过 10MB!')
+    return false
+  }
+  return true
+}
+
+const handleUploadSuccess = (response, file) => {
+  if (response.code === 200) {
+    form.images.push(response.data)
+    ElMessage.success('图片上传成功')
+  } else {
+    ElMessage.error(response.message || '图片上传失败')
+  }
+}
+
+const handleRemoveImage = (file) => {
+  const index = imageList.value.findIndex(item => item.uid === file.uid)
+  if (index > -1) {
+    form.images.splice(index, 1)
+  }
 }
 
 onMounted(() => {

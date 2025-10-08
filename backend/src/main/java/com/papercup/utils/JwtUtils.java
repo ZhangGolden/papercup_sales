@@ -133,7 +133,10 @@ public class JwtUtils {
      */
     public String extractTokenFromHeader(String authHeader) {
         if (authHeader != null && authHeader.startsWith(jwtConfig.getPrefix())) {
-            return authHeader.substring(jwtConfig.getPrefix().length());
+            String token = authHeader.substring(jwtConfig.getPrefix().length()).trim();
+            // 移除所有空白字符
+            token = token.replaceAll("\\s+", "");
+            return token.isEmpty() ? null : token;
         }
         return null;
     }

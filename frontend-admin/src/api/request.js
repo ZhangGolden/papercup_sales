@@ -14,7 +14,9 @@ request.interceptors.request.use(
   config => {
     const userStore = useUserStore()
     if (userStore.token) {
-      config.headers.Authorization = `Bearer ${userStore.token}`
+      // 确保token没有额外的空白字符
+      const cleanToken = userStore.token.trim()
+      config.headers.Authorization = `Bearer ${cleanToken}`
     }
     return config
   },

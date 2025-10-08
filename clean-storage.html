@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>清理存储</title>
+</head>
+<body>
+    <h1>清理浏览器存储</h1>
+    
+    <div>
+        <h3>当前存储状态</h3>
+        <pre id="currentStorage"></pre>
+    </div>
+    
+    <div>
+        <button onclick="cleanStorage()">清理所有存储</button>
+        <button onclick="checkStorage()">检查存储</button>
+    </div>
+    
+    <div>
+        <h3>重新登录</h3>
+        <input type="text" id="username" placeholder="用户名" value="admin">
+        <input type="password" id="password" placeholder="密码" value="admin123">
+        <button onclick="reLogin()">重新登录</button>
+        <pre id="loginResult"></pre>
+    </div>
+
+    <script>
+        function checkStorage() {
+            const storage = {
+                admin_token: localStorage.getItem('admin_token'),
+                admin_userInfo: localStorage.getItem('admin_userInfo'),
+                tokenLength: localStorage.getItem('admin_token')?.length || 0,
+                hasWhitespace: localStorage.getItem('admin_token')?.includes(' ') || false
+            };
+            
+            document.getElementById('currentStorage').textContent = JSON.stringify(storage, null, 2);
+        }
+        
+        function cleanStorage() {
+            localStorage.clear();
+            sessionStorage.clear();
+            document.getElementById('currentStorage').textContent = '存储已清理';
+            document.getElementById('loginResult').textContent = '';
+        }
+        
+        async function reLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const result = await response.json();
+                
+                if (result.code === 200) {
+                    // 清理token中的空白字符
+                    const cleanToken = result.data.token.trim();
+                    localStorage.setItem('admin_token', cleanToken);
+                    localStorage.setItem('admin_userInfo', JSON.stringify(result.data));
+                    
+                    document.getElementById('loginResult').textContent = 
+                        `登录成功！\nToken长度: ${cleanToken.length}\n包含空格: ${cleanToken.includes(' ')}`;
+                } else {
+                    document.getElementById('loginResult').textContent = `登录失败: ${result.message}`;
+                }
+            } catch (error) {
+                document.getElementById('loginResult').textContent = `错误: ${error.message}`;
+            }
+        }
+        
+        // 页面加载时检查存储
+        window.onload = checkStorage;
+    </script>
+</body>
+</html>

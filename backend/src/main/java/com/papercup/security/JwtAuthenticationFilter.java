@@ -37,6 +37,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader(jwtConfig.getHeader());
         String token = jwtUtils.extractTokenFromHeader(authHeader);
         
+        log.debug("请求路径: {}, Authorization头长度: {}, Token长度: {}", 
+                  request.getRequestURI(), 
+                  authHeader != null ? authHeader.length() : 0,
+                  token != null ? token.length() : 0);
+        
         if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             try {
                 String username = jwtUtils.getUsernameFromToken(token);
